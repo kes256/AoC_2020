@@ -6,6 +6,6 @@ diffs = [2020 - x for x in nums]
 
 match = [x for x in nums if x in diffs]
 
-assert(len(match)==2)
+assert(len(match) == 2)
 
 print(match[0]*match[1])
