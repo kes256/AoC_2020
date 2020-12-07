@@ -12,8 +12,11 @@ for line in inputs:
     contains[outside] = set()
     inners = inside.split(',')
     for bag in inners:
-        color = bag.strip(' .\n0123456789')
-        contains[outside].add(color)
+        if 'no other' in bag:
+            continue
+        rule = bag.strip(' .\n')
+        count, color = rule.split(' ', 1)
+        contains[outside].add((color, int(count)))
         if color in contained_by.keys():
             contained_by[color].add(outside)
         else:
@@ -31,3 +34,14 @@ while inners:
     inners = outers - processed
 print(len(outers))
 
+
+def count_insides(color):
+    count = 0
+    if color not in contains.keys():
+        return count
+    for inner in contains[color]:
+        count += inner[1] * (count_insides(inner[0]) + 1)
+    return(count)
+
+
+print(count_insides('shiny gold'))
