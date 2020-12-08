@@ -1,10 +1,6 @@
 with open('input8.txt') as f:
     inputs = f.readlines()
 
-visited = set()
-index = 0
-accumulator = 0
-
 
 def process_instruction(inputs, index, accumulator):
     line = inputs[index]
@@ -18,8 +14,36 @@ def process_instruction(inputs, index, accumulator):
     return index, accumulator
 
 
-while index not in visited:
-    visited.add(index)
-    index, accumulator = process_instruction(inputs, index, accumulator)
+def run_program(inputs):
+    visited = set()
+    length= len(inputs)
+    index = 0
+    accumulator = 0
+    while index not in visited and index < length:
+        visited.add(index)
+        index, accumulator = process_instruction(inputs, index, accumulator)
 
-print(accumulator)
+    return accumulator, length-index
+
+
+print(run_program(inputs))
+
+for i in range(len(inputs)):
+    if 'nop' in inputs[i]:
+        old_input = inputs[i]
+        inputs[i] = inputs[i].replace('nop','jmp')
+    elif 'jmp' in inputs[i]:
+        old_input = inputs[i]
+        inputs[i] = inputs[i].replace('jmp','nop')
+    else:
+        continue
+    accumulator, gap = run_program(inputs)
+    if gap == 0:
+        print(accumulator)
+        break
+    else:
+        inputs[i] = old_input
+
+
+
+
