@@ -17,7 +17,9 @@ minute_constraints = zip(inputs[1].split(','), range(len(inputs[1].split(','))))
 chinese_remainder_inputs = []
 for row in minute_constraints:
     if 'x' != row[0]:
-        chinese_remainder_inputs.append((int(row[0]), row[1]))
+        modulus = int(row[0])
+        remainder = -row[1] % modulus
+        chinese_remainder_inputs.append((modulus, remainder))
 
 products = {}
 for i, _ in chinese_remainder_inputs:
@@ -41,7 +43,7 @@ lcm = bus_ids[0] * products[bus_ids[0]]
 result = 0
 for modulus, remainder in chinese_remainder_inputs:
     m = inv(products[modulus], modulus)
-    result += (remainder * products[modulus] * m) % lcm
+    result += (remainder * products[modulus] * m)
     result = result % lcm
 
 print(result)
