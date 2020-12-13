@@ -29,23 +29,7 @@ for i, _ in chinese_remainder_inputs:
     products[i] = prod
 
 
-def egcd(a, b):  # copied from stackoverflow post on modular inverse
-    if a == 0:
-        return (b, 0, 1)
-    else:
-        g, y, x = egcd(b % a, a)
-        return (g, x - (b // a) * y, y)
-
-
-def modinv(a, m):  # copied from stackoverflow post on modular inverse
-    g, x, y = egcd(a, m)
-    if g != 1:
-        raise Exception('modular inverse does not exist')
-    else:
-        return x % m
-
-
-def modinv(a, m):  # brute force algorithm - fast enough for this puzzle, and I wrote it myself
+def inv(a, m):  # brute force algorithm - fast enough for this puzzle
     a = a % m
     for i in range(1, m):
         if (a * i) % m == 1:
@@ -56,7 +40,7 @@ def modinv(a, m):  # brute force algorithm - fast enough for this puzzle, and I 
 lcm = bus_ids[0] * products[bus_ids[0]]
 result = 0
 for modulus, remainder in chinese_remainder_inputs:
-    m = modinv(products[modulus], modulus)
+    m = inv(products[modulus], modulus)
     result += (remainder * products[modulus] * m) % lcm
     result = result % lcm
 
