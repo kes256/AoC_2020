@@ -1,8 +1,6 @@
 import time
 
-
 start = time.time()
-
 with open('input11.txt') as f:
     inputs = f.readlines()
 
@@ -23,16 +21,48 @@ def symbols_to_num(row):
     return cols
 
 
-neighbor_cache = {}
-
-
-def neighbors(x, y, state):
-    neighbor_count = 0
-    if (x, y) in neighbor_cache:
-        for (i, j) in neighbor_cache[(x, y)]:
-            neighbor_count += state[j][i]
+def sit_down(empty, full):
+    changes = set()
+    for seat in empty:
+        sit = True
+        for neighbor in neighbor_cache[seat]:
+            if neighbor in full:
+                sit = False
+        if sit:
+            changes.add(seat)
+    empty -= changes
+    full.update(changes)
+    if len(changes) == 0:
+        return 1
     else:
-        neighbor_list = []
+        return 0
+
+
+def stand_up(empty, full, tolerance):
+    changes = set()
+    for seat in full:
+        count = len(full.intersection(neighbor_cache[seat]))
+        if count >= tolerance:
+            changes.add(seat)
+    full -= changes
+    empty.update(changes)
+    if len(changes) == 0:
+        return 1
+    else:
+        return 0
+
+
+old = [symbols_to_num(x) for x in inputs]
+
+neighbor_cache = {}
+empty_seats = set()
+full_seats = set()
+for x in range(max_x):
+    for y in range(max_y):
+        if old[y][x] == -1:
+            continue
+        empty_seats.add((y, x))
+        neighbor_set = set()
         for col in range(x - 1, x + 2):
             if not 0 <= col < max_x:
                 continue
@@ -41,59 +71,28 @@ def neighbors(x, y, state):
                     continue
                 if col == x and row == y:
                     continue
-                if state[row][col] != -1:
-                    neighbor_list.append((col, row))
-                    neighbor_count += state[row][col]
-        neighbor_cache[(x, y)] = neighbor_list
-    return neighbor_count
+                if old[row][col] != -1:
+                    neighbor_set.add((row, col))
+
+        neighbor_cache[(y, x)] = neighbor_set
+finished = 0
+while finished != 2:
+    finished = sit_down(empty_seats, full_seats)
+    finished += stand_up(empty_seats, full_seats, 4)
+
+print(len(full_seats), time.time() - start)
 
 
-def sit_down(seats):
-    new_seats = []
-    for row in seats:
-        new_seats.append(row[:])
-    for x in range(max_x):
-        for y in range(max_y):
-            if seats[y][x] != -1:
-                count = neighbors(x, y, seats)
-                if not count:
-                    new_seats[y][x] = 1
-    return new_seats
-
-
-def stand_up(seats, tolerance):
-    new_seats = []
-    for row in seats:
-        new_seats.append(row[:])
-    for x in range(max_x):
-        for y in range(max_y):
-            if seats[y][x] != -1:
-                count = neighbors(x, y, seats)
-                if count >= tolerance:
-                    new_seats[y][x] = 0
-    return new_seats
-
-
-old = [symbols_to_num(x) for x in inputs]
-new = sit_down(old)
-while new != old:
-    old = new
-    new = sit_down(old)
-    new = stand_up(new, 4)
-
-count = [[x for x in row if x != -1] for row in new]
-count = [sum(row) for row in count]
-print(sum(count), time.time() - start)
 start = time.time()
-
-
-def neighbors(x, y, state):
-    neighbor_count = 0
-    if (x, y) in neighbor_cache:
-        for (i, j) in neighbor_cache[(x, y)]:
-            neighbor_count += state[j][i]
-    else:
-        neighbor_list = []
+neighbor_cache = {}
+empty_seats = set()
+full_seats = set()
+for x in range(max_x):
+    for y in range(max_y):
+        if old[y][x] == -1:
+            continue
+        empty_seats.add((y, x))
+        neighbor_set = set()
         for dx in range(-1, 2):
             if not 0 <= x + dx < max_x:
                 continue
@@ -104,7 +103,7 @@ def neighbors(x, y, state):
                 row = y + dy
                 if not 0 <= row < max_y:
                     continue
-                while state[row][col] == -1:
+                while old[row][col] == -1:
                     if not 0 <= row + dy < max_y:
                         break
                     if not 0 <= col + dx < max_x:
@@ -112,21 +111,14 @@ def neighbors(x, y, state):
                     col += dx
                     row += dy
 
-                if state[row][col] != -1:
-                    neighbor_list.append((col, row))
-                    neighbor_count += state[row][col]
-        neighbor_cache[(x, y)] = neighbor_list
-    return neighbor_count
+                if old[row][col] != -1:
+                    neighbor_set.add((row, col))
+        neighbor_cache[(y, x)] = neighbor_set
+
+finished = 0
+while finished != 2:
+    finished = sit_down(empty_seats, full_seats)
+    finished += stand_up(empty_seats, full_seats, 5)
 
 
-neighbor_cache = {}
-old = [symbols_to_num(x) for x in inputs]
-new = sit_down(old)
-while new != old:
-    old = new
-    new = sit_down(old)
-    new = stand_up(new, 5)
-
-count = [[x for x in row if x != -1] for row in new]
-count = [sum(row) for row in count]
-print(sum(count), time.time() - start)
+print(len(full_seats), time.time() - start)
