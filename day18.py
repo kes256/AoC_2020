@@ -45,7 +45,27 @@ answers = [51, 26, 437, 12240, 13632]
 for expression, answer in zip(expressions, answers):
     assert(int(pieces(expression)) == answer)
 
-sum = 0
+total = 0
 for expression in inputs:
-    sum += int(pieces(expression))
-print(sum)
+    total += int(pieces(expression))
+print(total)
+
+
+def value(piece):
+    sums = piece.split(' * ')
+    multiplicands = [sum([int(summand) for summand in x.split(' + ')]) for x in sums]
+    prod = 1
+    for mult in multiplicands:
+        prod *= mult
+    return str(prod)
+
+
+answers = [51, 46, 1445, 669060, 23340]
+
+for expression, answer in zip(expressions, answers):
+    assert(int(pieces(expression)) == answer)
+
+total = 0
+for expression in inputs:
+    total += int(pieces(expression))
+print(total)
