@@ -13,7 +13,10 @@ for index, line in enumerate(inputs):
     rule, contents = line.strip().split(': ')
     if rule not in rule_lookups.keys():
         rule_lookups[rule] = set()
-    rules[rule] = f' {contents} '
+    if '|' in contents:
+        contents = contents.replace('|', ')|(')
+        contents = f'( {contents} )'
+    rules[rule] = f'( {contents} )'
     nums = contents.replace('|', '').split()
     for num in nums:
         if num in rule_lookups.keys():
@@ -27,10 +30,10 @@ while flat_rules:
     current_rule = flat_rules.pop()
     content = rules[current_rule].replace('"', '')
     for rule in rule_lookups[current_rule]:
-        rules[rule] = rules[rule].replace(f' {current_rule} ', f' ({content}) ')
-        rules[rule] = rules[rule].replace(f' {current_rule} ', f' ({content}) ')
-        rules[rule] = rules[rule].replace(f' {current_rule} ', f' ({content}) ')
-        rules[rule] = rules[rule].replace(f' {current_rule} ', f' ({content}) ')
+        rules[rule] = rules[rule].replace(f' {current_rule} ', f' {content} ')
+        rules[rule] = rules[rule].replace(f' {current_rule} ', f' {content} ')
+        rules[rule] = rules[rule].replace(f' {current_rule} ', f' {content} ')
+        rules[rule] = rules[rule].replace(f' {current_rule} ', f' {content} ')
         # print(f'{current_rule} -> {rule}: {rules[rule]}')
         if not reference.search(rules[rule]):
             flat_rules.add(rule)
@@ -48,4 +51,20 @@ print(count)
 
 rules['8'] = ' 42 | 42 8 '
 rules['11'] = ' 42 31 | 42 11 31 '
+
+# rule 0 = 8 11 -> 42 {42*} 42 {42...31} 31
+
+rule42 = rules['42'].replace(' ', '')
+rule31 = rules['31'].replace(' ', '')
+extended_zero = re.compile(f'^({rule42})+{rule42}({rule42}({rule42}({rule42}(?P<recurse>.*){rule31})?{rule31})?{rule31})?{rule31}$')
+
+count = 0
+for line in inputs[message_start + 1:]:
+    matches = extended_zero.search(line)
+    if matches:
+        if matches.group('recurse'):
+            print('recurse more!')
+        count += 1
+
+print(count)
 
