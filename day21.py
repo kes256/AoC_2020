@@ -21,12 +21,25 @@ for line in inputs:
 
 bad_ingred = set()
 for value in allergen_ingred.values():
-    # print(len(value))
     bad_ingred.update(value)
 
-# print(len(bad_ingred), len(allergen_ingred))
 total = 0
 for key, count in ingredient_counts.items():
     if key not in bad_ingred:
         total += count
 print(total)
+
+allergen_matches = {}
+while bad_ingred:
+    match = min(allergen_ingred.items(), key=lambda x: len(x[1]))
+    allergen = match[0]
+    choices = match[1]
+    match = choices.pop()
+    allergen_matches[allergen] = match
+    bad_ingred -= {match}
+    del allergen_ingred[allergen]
+    for allergen in allergen_ingred.keys():
+        allergen_ingred[allergen] -= {match}
+
+match_list = [x[1] for x in sorted(allergen_matches.items())]
+print(','.join(match_list))
